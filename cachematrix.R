@@ -5,6 +5,11 @@
 ## This function creates a special "matrix" object that can cache its inverse.
 ## Will follow the pattern of the example makeVector funtion
 ## Note to self: try to understand this syntax as a class definition
+## PS: should also return a list of functions, not a matrix.
+## 1.set the value of the matrix
+## 2.get the value of the matrix
+## 3.set the value of the inverse
+## 4.get the value of the inverse
 
 makeCacheMatrix <- function(x = matrix()) {
     i <- NULL ## inverse of matrix x
@@ -15,12 +20,13 @@ makeCacheMatrix <- function(x = matrix()) {
     }
     get <- function() x ## return x
     
-    setinv <- function(solve) i <<- solve
-    getinv <- function() i
+    setinv <- function(solve) i <<- solve ## save inverse of x
+    getinv <- function() i ## return inverse of x
     
-    ## since the matrix will always be invertible, thus nrow(x) == ncol(x) 
-    ## == nrow(i) == ncol(i) 
-    matrix(c(x, i), nrow = nrow(x), ncol = ncol(x) + ncol(x))  
+    # return the list of functions
+    list(set = set, get = get,
+         setinv = setinv,
+         getinv = getinv)  
 }
 
 
@@ -32,13 +38,16 @@ makeCacheMatrix <- function(x = matrix()) {
 
 cacheSolve <- function(x, ...) {
         ## Return a matrix that is the inverse of 'x'
-    m <- x$getmean()
-    if(!is.null(m)) {
-        message("getting cached data")
-        return(m)
+        ## in which x is a special "matrix" object returned by makeCacheMatrix
+    i <- x$getinv()
+    if(!is.null(i)) {
+        message("getting cached inverse")
+        return(i)
     }
-    data <- x$get()
-    m <- mean(data, ...)
-    x$setmean(m)
-    m
+    
+    ## if i == NULL, need to calc i, store into x, and return i
+    xm <- x$get()
+    i <- solve(xm,...)
+    x$setinv(i)
+    i
 }
